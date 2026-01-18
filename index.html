@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Clicker - Form Helper</title>
+    <style>
+      html, body { height: 100%; }
+      html { background: #0b1020; }
+      body { margin: 0; background: #0b1020; color: #e5e7eb; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+      .acfh-route-anchor { position: absolute; left: -99999px; top: 0; width: 1px; height: 1px; overflow: hidden; }
+
+      .acfh-skeleton-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        background: radial-gradient(circle at top left, rgba(0, 132, 255, 0.18), transparent 55%),
+                    radial-gradient(circle at bottom right, rgba(130, 87, 230, 0.24), transparent 55%),
+                    #020617;
+        color: #e5e7eb;
+        box-sizing: border-box;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      /* Prevent interactions during load */
+      .acfh-skeleton-overlay * {
+        pointer-events: none;
+      }
+
+      .acfh-skeleton-shell {
+        width: 100%;
+        max-width: 1400px;
+        margin: 62px auto 0 auto;
+        padding: 0 20px 22px;
+        box-sizing: border-box;
+      }
+
+      .sk-landing {
+        width: 100%;
+        min-height: calc(100vh - 116px);
+        padding: 0;
+        box-sizing: border-box;
+        border-radius: 16px 16px 0 0;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+        background: radial-gradient(circle at top left, rgba(0, 132, 255, 0.18), transparent 55%),
+                    radial-gradient(circle at bottom right, rgba(130, 87, 230, 0.24), transparent 55%),
+                    #020617;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .sk-section {
+        margin: 0 0 22px;
+        padding: 26px;
+        box-sizing: border-box;
+      }
+
+      .sk {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(255,255,255,.06);
+      }
+      .sk::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-60%);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+        animation: shimmer 1.15s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0% { transform: translateX(-60%); }
+        100% { transform: translateX(60%); }
+      }
+
+      .sk-line { height: 12px; border-radius: 999px; }
+      .sk-line.sm { height: 10px; }
+      .sk-line.lg { height: 16px; }
+      .sk-circle { width: 34px; height: 34px; border-radius: 999px; }
+      .sk-pill { height: 34px; border-radius: 999px; }
+      .sk-icon { width: 36px; height: 36px; border-radius: 10px; }
+      .sk-icon.sm { width: 34px; height: 34px; border-radius: 8px; }
+
+      .sk-home, .sk-docs, .sk-test, .sk-privacy { display: none; }
+
+      /* Route switch is frozen on initial hash (prevents bootstrap from flipping it) */
+      html[data-acfh-skeleton-route="home"] .acfh-skeleton-overlay .sk-home { display: block; }
+      html[data-acfh-skeleton-route="docs"] .acfh-skeleton-overlay .sk-docs { display: block; }
+      html[data-acfh-skeleton-route="teste"] .acfh-skeleton-overlay .sk-test { display: block; }
+      html[data-acfh-skeleton-route="privacy"] .acfh-skeleton-overlay .sk-privacy { display: block; }
+
+      /* === Topbar skeleton (same structure as options) === */
+      .acfh-skeleton-overlay header.site-header {
+        background-color: rgba(15, 23, 42, 0.96);
+        color: #e5e7eb;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        position: relative;
+        z-index: 50;
+      }
+
+      .acfh-skeleton-overlay .top-header-bar {
+        background-color: rgba(15, 23, 42, 0.96);
+        width: 100%;
+        height: 56px;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        z-index: 200;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .topbar-inner {
+        max-width: 1200px;
+        width: 100%;
+        flex: 1;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .acfh-skeleton-overlay .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .acfh-skeleton-overlay .site-logo-square {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background: transparent;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .navbar ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .acfh-skeleton-overlay .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+
+      .acfh-skeleton-overlay .topbar-links {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      /* === Home skeleton layout (matches final landing: center hero + iframe 420px + cards) === */
+      .sk-home-hero {
+        text-align: center;
+        width: 100%;
+      }
+
+      .sk-hero-actions {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin: 18px 0 26px;
+        flex-wrap: wrap;
+      }
+
+      .sk-video-wrap {
+        max-width: 860px;
+        margin: 0 auto;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: rgba(0, 0, 0, 0.4);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.6);
+      }
+
+      .sk-video {
+        height: 420px;
+        border-radius: 0;
+      }
+
+      .sk-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 32px;
+        text-align: left;
+      }
+
+      .sk-card {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, 0.45);
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      }
+
+      @media (max-width: 900px) {
+        .acfh-skeleton-shell {
+          margin-top: 62px;
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .sk-video-wrap {
+          max-width: 100%;
+        }
+
+        .sk-video {
+          height: 320px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .sk-cards {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Mobile polish: keep skeleton aligned with the real mobile UI */
+      @media (max-width: 520px) {
+        .acfh-skeleton-overlay {
+          overflow: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .acfh-skeleton-overlay .top-header-bar {
+          padding: 0 12px;
+          height: 54px;
+        }
+
+        .acfh-skeleton-overlay .topbar-inner {
+          gap: 12px;
+        }
+
+        /* On mobile the real header is compact; avoid overflow */
+        .acfh-skeleton-overlay .navbar {
+          display: none;
+        }
+
+        /* This pill represents the title/search area; make it fit */
+        .acfh-skeleton-overlay .topbar-left > .sk.sk-pill {
+          width: 140px !important;
+        }
+
+        .acfh-skeleton-shell {
+          margin-top: 58px;
+          padding-left: 12px;
+          padding-right: 12px;
+          padding-bottom: 16px;
+        }
+
+        .sk-landing {
+          border-radius: 14px 14px 0 0;
+          min-height: calc(100vh - 94px);
+        }
+
+        .sk-section {
+          padding: 18px;
+        }
+
+        .sk-video {
+          height: 220px;
+        }
+
+        /* Hero text widths become percentage-based */
+        .sk-home-hero .sk-hero-title {
+          width: 84% !important;
+          max-width: 360px;
+        }
+        .sk-home-hero .sk-hero-subtitle {
+          width: 92% !important;
+          max-width: 420px;
+        }
+
+        /* Docs/Test/Privacy are stacked in the real mobile UI */
+        .sk-two-col {
+          grid-template-columns: 1fr;
+          gap: 14px;
+          margin-top: 14px;
+        }
+
+        /* Sidebar behaves like the top selector panel; hide long lists */
+        .sk-sidebar {
+          padding: 16px;
+        }
+        .sk-sidebar .sk-list {
+          display: none;
+        }
+
+        .sk-main {
+          padding: 16px;
+        }
+
+        .sk-test-selector-line {
+          grid-template-columns: 34px 1fr 30px;
+        }
+      }
+
+      .sk-two-col {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .sk-sidebar { padding: 14px; border-radius: 18px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+      .sk-main { padding: 18px; border-radius: 18px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+      .sk-list { display: grid; gap: 10px; margin-top: 12px; }
+      .sk-section { display: grid; gap: 10px; margin-top: 12px; }
+
+      .sk-panel {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, 0.45);
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      }
+
+      .sk-test-cards { display: grid; gap: 14px; margin-top: 16px; }
+      .sk-test-card {
+        display: grid;
+        grid-template-columns: 1fr 170px;
+        gap: 18px;
+        align-items: center;
+      }
+      .sk-test-selector { display: grid; gap: 10px; }
+      .sk-test-selector-line {
+        display: grid;
+        grid-template-columns: 46px 1fr 34px;
+        gap: 10px;
+        align-items: center;
+      }
+      .sk-test-action { display: flex; justify-content: flex-end; }
+
+      .sk-privacy-bullets { display: grid; gap: 10px; margin-top: 12px; }
+      .sk-privacy-bullet {
+        display: grid;
+        grid-template-columns: 12px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .sk-contact {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .sk-contact-row {
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      @media (max-width: 900px) {
+        .sk-test-card {
+          grid-template-columns: 1fr;
+        }
+        .sk-test-action {
+          justify-content: flex-start;
+        }
+      }
+
+      .acfh-sr-only {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Mobile-only skeleton blocks for Docs/Test/Privacy (index routes) */
+      .sk-mobile-only { display: none; }
+      /* Do not set display here; preserve original layout (e.g., grid). */
+      .sk-desktop-only { }
+
+      @media (max-width: 520px) {
+        .sk-mobile-only {
+          display: grid;
+          gap: 14px;
+          margin-top: 14px;
+        }
+        .sk-desktop-only { display: none !important; }
+
+        .sk-mobile-selector {
+          padding: 16px;
+        }
+        .sk-mobile-content {
+          padding: 16px;
+        }
+        .sk-mobile-content .sk-section {
+          padding: 0;
+          margin: 0;
+        }
+        .sk-mobile-bullets { display: grid; gap: 10px; margin-top: 12px; }
+        .sk-mobile-bullet {
+          display: grid;
+          grid-template-columns: 10px 1fr;
+          gap: 10px;
+          align-items: center;
+        }
+      }
+    </style>
+    <script>
+      (function () {
+        // Freeze which skeleton section is shown based on the initial URL hash.
+        // The bootstrap loader may update the hash during navigation, which would
+        // otherwise cause a visible skeleton "swap".
+        (function () {
+          var raw = (window.location.hash || '').toLowerCase().trim();
+          var route = 'home';
+          if (raw === '#docs') route = 'docs';
+          else if (raw === '#teste') route = 'teste';
+          else if (raw === '#privacy') route = 'privacy';
+          document.documentElement.setAttribute('data-acfh-skeleton-route', route);
+        })();
+
+        var DEFAULT_ORIGIN = 'https://extension-server-lv3j.onrender.com';
+        var origin = DEFAULT_ORIGIN;
+        try {
+          var stored = (window.localStorage && localStorage.getItem('ACFH_FLASK_ORIGIN')) || '';
+          stored = String(stored || '').trim();
+          var looksLocal = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/?$/i.test(stored);
+          origin = (stored && !looksLocal ? stored : DEFAULT_ORIGIN).replace(/\/+$/, '');
+
+          // The remote bootstrap.js still defaults to localhost; persist the chosen origin
+          // so the bootstrap fetches HTML/assets from Render by default.
+          if (window.localStorage && (!stored || looksLocal)) {
+            localStorage.setItem('ACFH_FLASK_ORIGIN', origin);
+          }
+        } catch (e) {
+          origin = DEFAULT_ORIGIN;
+        }
+        var s = document.createElement('script');
+        s.src = origin + '/bootstrap.js';
+        s.defer = true;
+        document.head.appendChild(s);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Esta página precisa de JavaScript.</noscript>
+
+    <!-- Anchors kept for backward-compat; skeleton selection is now frozen via data-acfh-skeleton-route. -->
+    <a id="docs" class="acfh-route-anchor" aria-hidden="true"></a>
+    <a id="teste" class="acfh-route-anchor" aria-hidden="true"></a>
+    <a id="privacy" class="acfh-route-anchor" aria-hidden="true"></a>
+
+    <div class="acfh-skeleton-overlay acfh-loading-overlay" role="status" aria-live="polite">
+      <header class="site-header" aria-hidden="true">
+        <div class="top-header-bar">
+          <div class="topbar-inner">
+            <div class="topbar-left">
+              <div class="site-logo-square"><div class="sk sk-circle" style="width: 24px; height: 24px; border-radius: 6px;"></div></div>
+              <nav class="navbar" aria-label="Main navigation">
+                <ul>
+                  <li><div class="sk sk-pill" style="width: 56px; height: 28px;"></div></li>
+                  <li><div class="sk sk-pill" style="width: 56px; height: 28px;"></div></li>
+                  <li><div class="sk sk-pill" style="width: 92px; height: 28px;"></div></li>
+                </ul>
+              </nav>
+              <div class="sk sk-pill" style="width: 220px; height: 28px;"></div>
+            </div>
+
+            <div class="topbar-right">
+              <div class="topbar-links">
+                <div class="sk sk-icon sm"></div>
+                <div class="sk sk-icon sm"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="acfh-skeleton-shell">
+        <div class="sk-landing">
+
+        <!-- Home (index.html) skeleton -->
+        <div class="sk-home">
+          <div class="sk-section" aria-hidden="true">
+            <div class="sk-home-hero">
+              <div class="sk sk-line lg sk-hero-title" style="width: 420px; height: 22px; margin: 0 auto;"></div>
+              <div class="sk sk-line sk-hero-subtitle" style="width: 620px; margin: 14px auto 0;"></div>
+              <div class="sk-hero-actions">
+                <div class="sk sk-pill" style="width: 150px; height: 40px; border-radius: 10px;"></div>
+                <div class="sk sk-pill" style="width: 170px; height: 40px; border-radius: 10px;"></div>
+              </div>
+
+              <div class="sk-video-wrap">
+                <div class="sk sk-video"></div>
+              </div>
+
+              <div class="sk-cards">
+                <div class="sk-card">
+                  <div class="sk sk-line" style="width: 160px;"></div>
+                  <div class="sk sk-line sm" style="width: 92%; margin-top: 12px;"></div>
+                  <div class="sk sk-line sm" style="width: 78%; margin-top: 10px;"></div>
+                </div>
+                <div class="sk-card">
+                  <div class="sk sk-line" style="width: 148px;"></div>
+                  <div class="sk sk-line sm" style="width: 86%; margin-top: 12px;"></div>
+                  <div class="sk sk-line sm" style="width: 74%; margin-top: 10px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Docs/Test/Privacy skeletons (same layout) -->
+        <div class="sk-docs">
+          <!-- Mobile: selector panel + content card (matches real UI) -->
+          <div class="sk-mobile-only" aria-hidden="true">
+            <div class="sk-panel sk-mobile-selector">
+              <div class="sk sk-line sm" style="width: 64px;"></div>
+              <div class="sk sk-pill" style="width: 100%; height: 42px; margin-top: 12px;"></div>
+            </div>
+            <div class="sk-panel sk-mobile-content">
+              <div class="sk sk-line lg" style="width: 46%;"></div>
+              <div class="sk sk-line sm" style="width: 92%; margin-top: 12px;"></div>
+              <div class="sk sk-line sm" style="width: 86%; margin-top: 10px;"></div>
+              <div class="sk sk-line sm" style="width: 78%; margin-top: 10px;"></div>
+              <div class="sk-mobile-bullets">
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 88%;"></div>
+                </div>
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 82%;"></div>
+                </div>
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 76%;"></div>
+                </div>
+              </div>
+              <div class="sk sk-pill" style="width: 62%; height: 34px; margin-top: 14px;"></div>
+            </div>
+          </div>
+
+          <!-- Desktop/tablet: two-column layout -->
+          <div class="sk-two-col sk-desktop-only">
+            <div class="sk-sidebar" aria-hidden="true">
+              <div class="sk sk-line" style="width: 44%;"></div>
+              <div class="sk sk-pill" style="width: 100%; height: 38px; margin-top: 14px;"></div>
+              <div class="sk-list">
+                <div class="sk sk-pill" style="width: 100%;"></div>
+                <div class="sk sk-pill" style="width: 96%;"></div>
+                <div class="sk sk-pill" style="width: 92%;"></div>
+                <div class="sk sk-pill" style="width: 88%;"></div>
+                <div class="sk sk-pill" style="width: 93%;"></div>
+                <div class="sk sk-pill" style="width: 90%;"></div>
+                <div class="sk sk-pill" style="width: 86%;"></div>
+                <div class="sk sk-pill" style="width: 84%;"></div>
+                <div class="sk sk-pill" style="width: 89%;"></div>
+                <div class="sk sk-pill" style="width: 82%;"></div>
+                <div class="sk sk-pill" style="width: 92%;"></div>
+                <div class="sk sk-pill" style="width: 80%;"></div>
+              </div>
+            </div>
+            <div class="sk-main" aria-hidden="true">
+              <div class="sk sk-line lg" style="width: 38%;"></div>
+              <div class="sk-section">
+                <div class="sk sk-line" style="width: 92%;"></div>
+                <div class="sk sk-line" style="width: 86%;"></div>
+                <div class="sk sk-line" style="width: 78%;"></div>
+              </div>
+              <div class="sk-section" style="margin-top: 18px;">
+                <div class="sk sk-line sm" style="width: 54%;"></div>
+                <div class="sk sk-line sm" style="width: 62%;"></div>
+                <div class="sk sk-line sm" style="width: 58%;"></div>
+              </div>
+              <div class="sk-section" style="margin-top: 18px; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="sk sk-pill" style="width: 100%; height: 38px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 38px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-test">
+          <!-- Mobile: selector panel + test cards (matches real UI) -->
+          <div class="sk-mobile-only" aria-hidden="true">
+            <div class="sk-panel sk-mobile-selector">
+              <div class="sk sk-line sm" style="width: 54px;"></div>
+              <div class="sk sk-pill" style="width: 100%; height: 42px; margin-top: 12px;"></div>
+            </div>
+            <div class="sk-panel sk-mobile-content">
+              <div class="sk sk-line lg" style="width: 34%;"></div>
+              <div class="sk sk-line sm" style="width: 86%; margin-top: 12px;"></div>
+
+              <div class="sk-test-cards" style="margin-top: 14px;">
+                <div class="sk-panel sk-test-card" style="padding: 14px;">
+                  <div class="sk-test-selector">
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 42px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 30px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                  </div>
+                  <div class="sk-test-action" style="margin-top: 12px;">
+                    <div class="sk sk-pill" style="width: 140px; height: 38px;"></div>
+                  </div>
+                </div>
+
+                <div class="sk-panel sk-test-card" style="padding: 14px;">
+                  <div class="sk-test-selector">
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 42px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 30px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                  </div>
+                  <div class="sk-test-action" style="margin-top: 12px;">
+                    <div class="sk sk-pill" style="width: 140px; height: 38px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop/tablet: two-column layout -->
+          <div class="sk-two-col sk-desktop-only">
+            <div class="sk-sidebar" aria-hidden="true">
+              <div class="sk sk-line" style="width: 38%;"></div>
+              <div class="sk sk-pill" style="width: 100%; height: 38px; margin-top: 14px;"></div>
+              <div class="sk-list">
+                <div class="sk sk-pill" style="width: 72%;"></div>
+                <div class="sk sk-pill" style="width: 62%;"></div>
+                <div class="sk sk-pill" style="width: 78%;"></div>
+              </div>
+            </div>
+
+            <div class="sk-main" aria-hidden="true">
+              <div class="sk sk-line lg" style="width: 28%;"></div>
+              <div class="sk sk-line" style="width: 60%; margin-top: 12px;"></div>
+
+              <div class="sk-test-cards">
+                <div class="sk-panel sk-test-card">
+                  <div class="sk-test-selector">
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 42px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 30px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                  </div>
+                  <div class="sk-test-action">
+                    <div class="sk sk-pill" style="width: 140px; height: 38px;"></div>
+                  </div>
+                </div>
+
+                <div class="sk-panel sk-test-card">
+                  <div class="sk-test-selector">
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 42px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 30px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                  </div>
+                  <div class="sk-test-action">
+                    <div class="sk sk-pill" style="width: 140px; height: 38px;"></div>
+                  </div>
+                </div>
+
+                <div class="sk-panel sk-test-card">
+                  <div class="sk-test-selector">
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 42px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                    <div class="sk-test-selector-line">
+                      <div class="sk sk-line sm" style="width: 30px;"></div>
+                      <div class="sk sk-pill" style="width: 100%; height: 30px;"></div>
+                      <div class="sk sk-icon sm"></div>
+                    </div>
+                  </div>
+                  <div class="sk-test-action">
+                    <div class="sk sk-pill" style="width: 140px; height: 38px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sk-privacy">
+          <!-- Mobile: selector panel + policy card (matches real UI) -->
+          <div class="sk-mobile-only" aria-hidden="true">
+            <div class="sk-panel sk-mobile-selector">
+              <div class="sk sk-line sm" style="width: 70px;"></div>
+              <div class="sk sk-pill" style="width: 100%; height: 42px; margin-top: 12px;"></div>
+            </div>
+            <div class="sk-panel sk-mobile-content">
+              <div class="sk sk-line lg" style="width: 44%;"></div>
+              <div class="sk sk-line sm" style="width: 92%; margin-top: 12px;"></div>
+              <div class="sk sk-line sm" style="width: 86%; margin-top: 10px;"></div>
+              <div class="sk sk-line sm" style="width: 80%; margin-top: 10px;"></div>
+              <div class="sk sk-line sm" style="width: 74%; margin-top: 10px;"></div>
+
+              <div class="sk-mobile-bullets" style="margin-top: 14px;">
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 90%;"></div>
+                </div>
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 84%;"></div>
+                </div>
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 78%;"></div>
+                </div>
+                <div class="sk-mobile-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line sm" style="width: 70%;"></div>
+                </div>
+              </div>
+
+              <div class="sk sk-pill" style="width: 58%; height: 34px; margin-top: 14px;"></div>
+              <div class="sk sk-pill" style="width: 44%; height: 34px; margin-top: 10px;"></div>
+            </div>
+          </div>
+
+          <!-- Desktop/tablet: two-column layout -->
+          <div class="sk-two-col sk-desktop-only">
+            <div class="sk-sidebar" aria-hidden="true">
+              <div class="sk sk-line" style="width: 44%;"></div>
+              <div class="sk-list" style="margin-top: 14px;">
+                <div class="sk sk-pill" style="width: 70%;"></div>
+                <div class="sk sk-pill" style="width: 62%;"></div>
+              </div>
+            </div>
+
+            <div class="sk-main" aria-hidden="true">
+              <div class="sk sk-line lg" style="width: 34%;"></div>
+              <div class="sk-section">
+                <div class="sk sk-line" style="width: 92%;"></div>
+                <div class="sk sk-line" style="width: 86%;"></div>
+                <div class="sk sk-line" style="width: 78%;"></div>
+              </div>
+
+              <div class="sk-privacy-bullets">
+                <div class="sk-privacy-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line" style="width: 88%;"></div>
+                </div>
+                <div class="sk-privacy-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line" style="width: 82%;"></div>
+                </div>
+                <div class="sk-privacy-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line" style="width: 76%;"></div>
+                </div>
+                <div class="sk-privacy-bullet">
+                  <div class="sk" style="width: 10px; height: 10px; border-radius: 999px;"></div>
+                  <div class="sk sk-line" style="width: 68%;"></div>
+                </div>
+              </div>
+
+              <div class="sk-panel sk-contact">
+                <div class="sk sk-line" style="width: 26%;"></div>
+                <div class="sk-contact-row">
+                  <div class="sk sk-line sm" style="width: 52px;"></div>
+                  <div class="sk sk-pill" style="width: 72%; height: 30px;"></div>
+                </div>
+                <div class="sk-contact-row">
+                  <div class="sk sk-line sm" style="width: 52px;"></div>
+                  <div class="sk sk-pill" style="width: 54%; height: 30px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

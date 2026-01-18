@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Clicker - Options</title>
+    <style>
+      html, body { height: 100%; }
+      html { background: #0b1020; }
+      body { margin: 0; background: #0b1020; color: #e5e7eb; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+      .acfh-skeleton-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        background: radial-gradient(circle at top left, rgba(0, 132, 255, 0.18), transparent 55%),
+                    radial-gradient(circle at bottom right, rgba(130, 87, 230, 0.24), transparent 55%),
+                    #020617;
+        box-sizing: border-box;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      /* Prevent interactions during load */
+      .acfh-skeleton-overlay * {
+        pointer-events: none;
+      }
+
+      .sk {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: rgba(255,255,255,.06);
+      }
+      .sk::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-60%);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+        animation: shimmer 1.15s ease-in-out infinite;
+      }
+      @keyframes shimmer { 0% { transform: translateX(-60%);} 100% { transform: translateX(60%);} }
+
+      .sk-line { height: 12px; border-radius: 999px; }
+      .sk-line.sm { height: 10px; }
+      .sk-line.lg { height: 16px; }
+      .sk-pill { height: 34px; border-radius: 999px; }
+      .sk-label { height: 10px; border-radius: 999px; opacity: .9; }
+      .sk-circle { width: 32px; height: 32px; border-radius: 8px; }
+
+      .sk-icon { width: 36px; height: 36px; border-radius: 10px; }
+      .sk-icon.sm { width: 34px; height: 34px; border-radius: 8px; }
+
+      .acfh-skeleton-note { margin-top: 14px; font-size: 12px; opacity: .78; }
+
+      .acfh-sr-only {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* === Layout CSS (scoped) – mirrors supabase_seed/web/options.html + options.css structure === */
+      .acfh-skeleton-overlay header.site-header {
+        background-color: rgba(15, 23, 42, 0.96);
+        color: #e5e7eb;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        position: relative;
+        z-index: 50;
+      }
+
+      .acfh-skeleton-overlay .top-header-bar {
+        background-color: rgba(15, 23, 42, 0.96);
+        width: 100%;
+        height: 56px;
+        padding: 0 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        z-index: 200;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .topbar-inner {
+        max-width: 1200px;
+        width: 100%;
+        flex: 1;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .acfh-skeleton-overlay .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .acfh-skeleton-overlay .site-logo-square {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background: transparent;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+      }
+
+      .acfh-skeleton-overlay .navbar ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 16px;
+      }
+
+      .acfh-skeleton-overlay .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+
+      .acfh-skeleton-overlay .topbar-links {
+        display: flex;
+        gap: 10px;
+      }
+
+      .acfh-skeleton-overlay .config-content {
+        display: flex;
+        width: 100%;
+        max-width: 1400px;
+        margin: 62px auto 0 auto;
+        height: calc(100vh - 116px);
+        min-height: 0;
+        border-radius: 16px 16px 0 0;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+        background: radial-gradient(circle at top left, rgba(0, 132, 255, 0.18), transparent 55%),
+                    radial-gradient(circle at bottom right, rgba(130, 87, 230, 0.24), transparent 55%),
+                    #020617;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .acfh-skeleton-overlay .config-sidebar {
+        width: 270px;
+        background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 55%),
+                    radial-gradient(circle at bottom, rgba(45, 212, 191, 0.08), transparent 60%),
+                    rgba(27, 31, 43, 0.95);
+        border-right: 1px solid rgba(30, 64, 175, 0.45);
+        padding: 15px 0;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        overflow: hidden;
+        min-height: 0;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 15px 15px;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        margin-bottom: 15px;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .config-list {
+        padding: 15px;
+        background: transparent;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .sk-config-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(2, 6, 23, 0.45);
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: 0 8px 18px rgba(0,0,0,.35);
+        display: grid;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .acfh-skeleton-overlay .config-details {
+        flex-grow: 1;
+        background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 55%),
+                    rgba(32, 36, 53, 0.96);
+        padding: 24px 24px 20px 24px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .acfh-skeleton-overlay .details-header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 24px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+      }
+
+      .acfh-skeleton-overlay .details-header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .acfh-skeleton-overlay .config-header-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 110px;
+        gap: 12px;
+      }
+
+      .acfh-skeleton-overlay .config-name-input,
+      .acfh-skeleton-overlay .config-url-input,
+      .acfh-skeleton-overlay .config-init-wait-input {
+        display: grid;
+        gap: 8px;
+      }
+
+      .acfh-skeleton-overlay .action-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 6px;
+      }
+
+      .acfh-skeleton-overlay .action-list-headers {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: 42px 1fr 1.1fr 0.7fr 0.6fr 0.6fr 46px;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 8px;
+        border-radius: 10px;
+        background: rgba(2, 6, 23, 0.55);
+        border: 1px solid rgba(255,255,255,.06);
+      }
+
+      .acfh-skeleton-overlay .xpath-actions-table {
+        margin-top: 10px;
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255,255,255,.02);
+        border: 1px solid rgba(255,255,255,.06);
+        overflow: hidden;
+      }
+
+      .acfh-skeleton-overlay .sk-row {
+        display: grid;
+        grid-template-columns: 42px 1fr 1.1fr 0.7fr 0.6fr 0.6fr 46px;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 4px;
+      }
+
+      .acfh-skeleton-overlay .sk-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .acfh-skeleton-overlay .sk-divider { height: 1px; background: rgba(255,255,255,.06); margin: 10px 0; }
+
+      /* === Mobile adjustments (do not affect desktop) === */
+      @media (max-width: 520px) {
+        .acfh-skeleton-overlay {
+          overflow: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .acfh-skeleton-overlay .top-header-bar {
+          padding: 0 12px;
+          height: 54px;
+        }
+
+        .acfh-skeleton-overlay .topbar-inner {
+          gap: 12px;
+        }
+
+        /* Mobile header is compact; avoid overflow */
+        .acfh-skeleton-overlay .navbar {
+          display: none;
+        }
+
+        .acfh-skeleton-overlay .topbar-left > .sk.sk-pill {
+          width: 140px !important;
+        }
+
+        .acfh-skeleton-overlay .config-content {
+          margin-top: 58px;
+          height: auto;
+          min-height: calc(100vh - 84px);
+          flex-direction: column;
+          border-radius: 14px 14px 0 0;
+        }
+
+        .acfh-skeleton-overlay .config-sidebar {
+          width: 100%;
+          border-right: 0;
+          border-bottom: 1px solid rgba(30, 64, 175, 0.35);
+          padding: 12px 0;
+          overflow: visible;
+        }
+
+        .acfh-skeleton-overlay .sidebar-header {
+          padding: 0 12px 12px;
+          margin-bottom: 12px;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        /* New Config + Search stack like the real mobile page */
+        .acfh-skeleton-overlay .sidebar-header > .sk.sk-pill {
+          flex: 1 1 100%;
+          width: 100% !important;
+        }
+
+        .acfh-skeleton-overlay .sidebar-header > .sk:not(.sk-icon):not(.sk-pill) {
+          flex: 1 1 100%;
+        }
+
+        .acfh-skeleton-overlay .config-list {
+          padding: 0 12px 12px;
+          overflow: visible;
+        }
+
+        .acfh-skeleton-overlay .config-list-desktop {
+          display: none;
+        }
+
+        .acfh-skeleton-overlay .config-list-mobile {
+          display: block;
+        }
+
+        .acfh-skeleton-overlay .config-details {
+          padding: 16px 12px 16px;
+          overflow: visible;
+        }
+
+        .acfh-skeleton-overlay .details-header {
+          margin-bottom: 16px;
+          padding-bottom: 14px;
+        }
+
+        .acfh-skeleton-overlay .details-header-top {
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .acfh-skeleton-overlay .config-header-row {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        /* On mobile the actions table scrolls horizontally */
+        .acfh-skeleton-overlay .action-list-headers,
+        .acfh-skeleton-overlay .sk-row {
+          min-width: 720px;
+        }
+
+        .acfh-skeleton-overlay .xpath-actions-table {
+          overflow-x: auto;
+          overflow-y: hidden;
+        }
+      }
+    </style>
+    <script>
+      (function () {
+        var DEFAULT_ORIGIN = 'https://extension-server-lv3j.onrender.com';
+        var origin = DEFAULT_ORIGIN;
+        try {
+          var stored = (window.localStorage && localStorage.getItem('ACFH_FLASK_ORIGIN')) || '';
+          stored = String(stored || '').trim();
+          var looksLocal = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/?$/i.test(stored);
+          origin = (stored && !looksLocal ? stored : DEFAULT_ORIGIN).replace(/\/+$/, '');
+
+          // The remote bootstrap.js still defaults to localhost; persist the chosen origin
+          // so the bootstrap fetches HTML/assets from Render by default.
+          if (window.localStorage && (!stored || looksLocal)) {
+            localStorage.setItem('ACFH_FLASK_ORIGIN', origin);
+          }
+        } catch (e) {
+          origin = DEFAULT_ORIGIN;
+        }
+        var s = document.createElement('script');
+        s.src = origin + '/bootstrap.js';
+        s.defer = true;
+        document.head.appendChild(s);
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>Esta página precisa de JavaScript.</noscript>
+
+    <div class="acfh-skeleton-overlay acfh-loading-overlay" role="status" aria-live="polite" aria-label="Carregando configurações">
+      <header class="site-header" aria-hidden="true">
+        <div class="top-header-bar">
+          <div class="topbar-inner">
+            <div class="topbar-left">
+              <div class="site-logo-square"><div class="sk sk-circle" style="width: 24px; height: 24px; border-radius: 6px;"></div></div>
+              <nav class="navbar" aria-label="Main navigation">
+                <ul>
+                  <li><div class="sk sk-pill" style="width: 56px; height: 28px;"></div></li>
+                  <li><div class="sk sk-pill" style="width: 56px; height: 28px;"></div></li>
+                  <li><div class="sk sk-pill" style="width: 92px; height: 28px;"></div></li>
+                </ul>
+              </nav>
+              <div class="sk sk-pill" style="width: 220px; height: 28px;"></div>
+            </div>
+            <div class="topbar-right">
+              <div class="topbar-links">
+                <div class="sk sk-icon sm"></div>
+                <div class="sk sk-icon sm"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="baixar" class="conteudo active-section" aria-hidden="true">
+        <div class="config-content">
+          <div class="config-sidebar">
+            <div class="sidebar-header">
+              <div class="sk sk-pill" style="width: 118px; height: 34px; border-radius: 8px;"></div>
+              <div class="sk" style="flex: 1; height: 34px; border-radius: 8px;"></div>
+              <div class="sk sk-icon sm"></div>
+              <div class="sk sk-icon sm"></div>
+            </div>
+            <div class="config-list">
+              <div class="config-list-desktop">
+                <div class="sk-config-item">
+                  <div class="sk sk-line" style="width: 72%; height: 14px;"></div>
+                  <div class="sk sk-line sm" style="width: 92%;"></div>
+                </div>
+                <div class="sk-config-item">
+                  <div class="sk sk-line" style="width: 64%; height: 14px;"></div>
+                  <div class="sk sk-line sm" style="width: 86%;"></div>
+                </div>
+                <div class="sk-config-item">
+                  <div class="sk sk-line" style="width: 78%; height: 14px;"></div>
+                  <div class="sk sk-line sm" style="width: 90%;"></div>
+                </div>
+                <div class="sk-config-item">
+                  <div class="sk sk-line" style="width: 58%; height: 14px;"></div>
+                  <div class="sk sk-line sm" style="width: 84%;"></div>
+                </div>
+                <div class="sk-config-item">
+                  <div class="sk sk-line" style="width: 70%; height: 14px;"></div>
+                  <div class="sk sk-line sm" style="width: 88%;"></div>
+                </div>
+              </div>
+
+              <!-- Mobile: dropdown/select placeholder instead of long list -->
+              <div class="config-list-mobile" style="display:none;" aria-hidden="true">
+                <div class="sk" style="width: 100%; height: 44px; border-radius: 12px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="config-details">
+            <div class="details-header">
+              <div class="details-header-top">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="sk sk-line lg" style="width: 160px;"></div>
+                  <div class="sk sk-icon sm"></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="sk sk-line sm" style="width: 48px;"></div>
+                  <div class="sk sk-pill" style="width: 110px; height: 22px;"></div>
+                </div>
+              </div>
+              <div style="display:flex; gap:10px; align-items:center; justify-content:flex-start;">
+                <div class="sk sk-icon sm"></div>
+                <div class="sk sk-icon sm"></div>
+                <div class="sk sk-icon sm"></div>
+              </div>
+            </div>
+
+            <div class="config-header-row">
+              <div class="config-name-input">
+                <div class="sk sk-label" style="width: 56px;"></div>
+                <div class="sk sk-pill" style="width: 100%;"></div>
+              </div>
+              <div class="config-url-input">
+                <div class="sk sk-label" style="width: 42px;"></div>
+                <div class="sk sk-pill" style="width: 100%;"></div>
+              </div>
+              <div class="config-init-wait-input">
+                <div class="sk sk-label" style="width: 92px;"></div>
+                <div class="sk sk-pill" style="width: 100%;"></div>
+              </div>
+            </div>
+
+            <div class="action-header">
+              <div class="sk sk-line" style="width: 90px;"></div>
+              <div class="sk sk-pill" style="width: 132px;"></div>
+            </div>
+
+            <div class="action-list-headers">
+              <div class="sk sk-line sm" style="width: 12px;"></div>
+              <div class="sk sk-line sm" style="width: 54px;"></div>
+              <div class="sk sk-line sm" style="width: 128px;"></div>
+              <div class="sk sk-line sm" style="width: 44px;"></div>
+              <div class="sk sk-line sm" style="width: 74px;"></div>
+              <div class="sk sk-line sm" style="width: 48px;"></div>
+              <div class="sk sk-line sm" style="width: 16px;"></div>
+            </div>
+
+            <div class="xpath-actions-table">
+              <div class="sk-row">
+                <div class="sk sk-pill" style="width: 42px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk-actions">
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                </div>
+              </div>
+              <div class="sk-divider"></div>
+              <div class="sk-row">
+                <div class="sk sk-pill" style="width: 42px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk-actions">
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                </div>
+              </div>
+              <div class="sk-divider"></div>
+              <div class="sk-row">
+                <div class="sk sk-pill" style="width: 42px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk sk-pill" style="width: 100%; height: 34px;"></div>
+                <div class="sk-actions">
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                  <div class="sk sk-icon sm" style="width: 34px; height: 34px;"></div>
+                </div>
+              </div>
+
+              <div class="acfh-sr-only">Carregando configurações…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
